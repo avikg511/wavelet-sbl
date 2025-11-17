@@ -1,6 +1,12 @@
 # wavelet-sbl
 ECE 251C Project testing Wavelet Domain Processing in Sparse Bayesian Learning Framework. This of course is a very generic project statement, so below is a more in depth description of the project.
 
+## Imports
+A handful of packages have been added. A (potentially out of date) list is below:
+
+>> Match.jl (Pkg.add('Match'))
+>> Parameters.jl (Pkg.add('Parameters'))
+
 ## Data
 The data itself is from the SWellEx-96 Experiment. More information on the experiment can be found [here](https://swellex96.ucsd.edu/). The general gist is that we're working with a few array geometries. The one we're using here is a Vertical Line Array (VLA). Nine different tones were transmitted underwater to this array over 20 minutes, and the data we have is for 64 hydrophones (63 officially because one of the hydrophones was broken).
 
