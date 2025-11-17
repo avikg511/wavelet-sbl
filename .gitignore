@@ -1,2 +1,2 @@
-./src/old_*.jl
-./old_*.jl
+src/old_*.jl
+old_*.jl
