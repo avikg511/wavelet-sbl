@@ -8,9 +8,13 @@
 =#
 
 using Parameters
-module SBLConfigs
+module SwellConfigs 
 
-@with_kw struct ConvergenceConfig
+# Exports
+export ProcessingMethod
+export conventional, conventional_symlets, sbl, sbl_symlets
+
+Base.@kwdef struct ConvergenceConfig
     # Convergence Error Thresholds
     error::Float32 = 10e-3
     delay::UInt16 = 200
@@ -21,7 +25,7 @@ module SBLConfigs
     max_iter::UInt32 = 1000
 end
 
-@with_kw struct SensorConfig
+Base.@kwdef struct SensorConfig
     # Noise Power Initialization Guess
     noise_power_guess::Float32    = 0.1       # [1/Hz] (Confirm units?)
 
@@ -29,7 +33,7 @@ end
     sound_speed::Float32 = 1488                 # [m / s]
 end
 
-@with_kw struct GeometryConfig
+Base.@kwdef struct GeometryConfig
     # Details about the Array
     num_sensors::UInt16 = 64                    # 64 Sensors is base, can be adjusted as necessary
     sensor_spacing::Float32 = 1.875             # [m]
@@ -44,7 +48,7 @@ end
     angles::Vector{Float32} = -90:0.5:90        # [°]
 end
 
-@with_kw struct SBLConfig 
+Base.@kwdef struct SBLConfig 
     # Number of iterations before you report, ~ Iteration Period
     status_report_num_iters::UInt16 = 150
 
@@ -59,7 +63,7 @@ end
     num_srcs::UInt16= 3
 end
 
-@with_kw struct WaveletConfig
+Base.@kwdef struct WaveletConfig
     type::Symbol = :symlet
     order::UInt8 = 8
 end
@@ -71,6 +75,14 @@ struct PhysicalConfigs
     SBL::SBLConfig
     Wavelet::WaveletConfig
     Geometry::GeometryConfig
+end
+
+# Setup for all methods
+@enum ProcessingMethod begin
+    conventional
+    conventional_symlets
+    sbl
+    sbl_symlets
 end
 
 end # module
