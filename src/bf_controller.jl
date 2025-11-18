@@ -13,12 +13,12 @@
 =# 
 
 # Includes
-include("./configs.jl")
-
 module BFController
 
 # Imports
-using ..SwellConfigs 
+include("./configs.jl")
+using .SwellConfigs 
+
 using Match             # Module to make nicer looking Enum Match Statements
 using MAT               # For reading .mat files
 

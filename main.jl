@@ -15,7 +15,6 @@
 include("./src/bf_controller.jl")
 
 using .BFController
-using .SwellConfigs
 
 function run()
     # Data is not provided here, but is in a .mat file.
@@ -25,32 +24,30 @@ function run()
     # and constant. The experiment config will be updated based on the data file itself.
     T::Type = UInt32
     U::Type = Float64
-    V::Type = ComplexF64
+    V::Type = Complex{U}            # Complex type based on U, used for complex pressures in data
 
-    convergence = ConvergenceConfig{T, U}()
-    sensor = SensorConfig{U}()
-    geometry = GeometryConfig{T, U}()
-    sbl = SBLConfig{T}()
-    wavelet = WaveletConfig{T}()
+    convergence     = BFController.SwellConfigs.ConvergenceConfig{T, U}()
+    sensor          = BFController.SwellConfigs.SensorConfig{U}()
+    geometry        = BFController.SwellConfigs.GeometryConfig{T, U}()
+    sbl             = BFController.SwellConfigs.SBLConfig{T}()
+    wavelet         = BFController.SwellConfigs.WaveletConfig{T}()
+    experiment      = BFController.SwellConfigs.ExperimentConfig{T, U, V}()
 
-    # Data is all in the form of Complex Float64 points, so set experiment config accordingly
-    experiment = ExperimentConfig{T, U, V}()
-
-    cfgs = PhysicalConfigs{T, U, V}(convergence, sensor, sbl, wavelet, geometry, experiment)
+    cfgs = BFController.SwellConfigs.PhysicalConfigs{T, U, V}(convergence, sensor, sbl, wavelet, geometry, experiment)
 
     # 1. Conventional Beamforming
     method = BFController.conventional
-    process(method, cfgs, filePath)
+    BFController.process(method, cfgs, filePath)
 
     # # 2. Conventional Beamforming with Symlets
     # method = BFController.conventional_symlets
-    # process(method)
-    
+    # BFController.process(method, cfgs, filePath)
+
     # 3. Sparse Bayesian Learning 
     # method = BFController.sbl 
-    # process(method, cfgs, filePath)
+    # BFController.process(method, cfgs, filePath)
     
     # # 4. Sparse Bayesian Learning with Symlets
     # method = BFController.sbl_symlets
-    # process(method)
+    # BFController.process(method, cfgs, filePath)
 end
