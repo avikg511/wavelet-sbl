@@ -9,6 +9,7 @@ Match.jl (Pkg.add('Match'))
 Parameters.jl (Pkg.add('Parameters'))
 MAT.jl (Pkg.add('MAT'))
 Plots.jl (Pkg.add('Plots'))
+Revise.jl (Pkg.add('Revise'))
 ```
 
 ## Data
