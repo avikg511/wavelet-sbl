@@ -47,8 +47,8 @@ function run()
     # process(method)
     
     # 3. Sparse Bayesian Learning 
-    method = BFController.sbl 
-    process(method, cfgs, filePath)
+    # method = BFController.sbl 
+    # process(method, cfgs, filePath)
     
     # # 4. Sparse Bayesian Learning with Symlets
     # method = BFController.sbl_symlets
