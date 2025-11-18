@@ -7,6 +7,8 @@ A handful of packages have been added. A (potentially out of date) list is below
 ```julia
 Match.jl (Pkg.add('Match')) 
 Parameters.jl (Pkg.add('Parameters'))
+MAT.jl (Pkg.add('MAT'))
+Plots.jl (Pkg.add('Plots'))
 ```
 
 ## Data
