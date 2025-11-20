@@ -26,6 +26,9 @@ using MAT               # For reading .mat files
 include("./conventional.jl")
 using .ConventionalBeamforming
 
+include("./sbl.jl")
+using .SparseBayesianLearning
+
 # Export public process function
 export process
 
@@ -94,7 +97,7 @@ function process_conv_sym(all_cfgs::PhysicalConfigs)
 end
 
 function process_sbl(all_cfgs::PhysicalConfigs)
-    println("In the Sparse Bayesian Learning Processing Function!")
+    SparseBayesianLearning.sbl(all_cfgs)
 end
 
 function process_sbl_sym(all_cfgs::PhysicalConfigs)
