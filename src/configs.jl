@@ -16,7 +16,7 @@ export conventional, conventional_symlets, sbl, sbl_symlets
 
 Base.@kwdef struct ConvergenceConfig{T <: Integer, U <: AbstractFloat}
     # Convergence Error Thresholds
-    error::U = 10e-3
+    error::U = 10e-4
     delay::T = 200
 
     # Iteration Parameters
