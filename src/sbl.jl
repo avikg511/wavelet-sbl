@@ -32,6 +32,7 @@ function sbl(all_cfgs::PhysicalConfigs{T, U, V}) where {T <: Integer, U <: Abstr
     # Sample Plot of final γ values
     plt = plot(report["final_iter_γ"], xlabel="Angle Index", ylabel="Final γ Values", title="SBL Final γ Values per Angle")
     display(plt)
+    savefig(pwd() * "/angle_vs_gamma.png")
     return report
 end
 

@@ -28,3 +28,8 @@ This style of beamforming is the simplest for DoA (direction of arrival) source 
 The direction of arrival should just be the direction with the highest power/correlation value. This is similar to an autocorrelation function calculation - for a sequence $r_{xx}(n)$, the largest value must be $r_{xx}(0)$ because that is the highest correlation between the two signals. 
 
 The issue with conventional beamforming is that it will always struggle to measure multiple sources.
+
+### Stage 2 - Sparse Bayesian Learning (With Gradient Descent Currently)
+Here, we actually get a full estimation of the multiple source directions. We split up processing amongst different frequencies, and combine all those estimates into a likelihood of sources at each angle. The implementation takes into account the known frequencies of the incoming waveforms and tries to estimate based on the geometry of the array, what the phase offset is between the sensors, etc. Below is a plot of the angle vs $\gamma$, a vector that denotes source power in a certain direction: 
+
+![Source power vs Angle of Arrival for SwellEx-96 VLA Experiment](./angle_vs_gamma.png "Source Power vs DoA")
