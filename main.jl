@@ -36,17 +36,17 @@ function run()
     cfgs = BFController.SwellConfigs.PhysicalConfigs{T, U, V}(convergence, sensor, sbl, wavelet, geometry, experiment)
 
     # 1. Conventional Beamforming
-    method = BFController.conventional
-    BFController.process(method, cfgs, filePath)
+    # method = BFController.conventional
+    # BFController.process(method, cfgs, filePath)
 
     # # 2. Conventional Beamforming with Symlets
     # method = BFController.conventional_symlets
     # BFController.process(method, cfgs, filePath)
 
     # 3. Sparse Bayesian Learning 
-    # method = BFController.sbl 
-    # BFController.process(method, cfgs, filePath)
-    
+    method = BFController.sbl 
+    report = BFController.process(method, cfgs, filePath)
+   
     # # 4. Sparse Bayesian Learning with Symlets
     # method = BFController.sbl_symlets
     # BFController.process(method, cfgs, filePath)
