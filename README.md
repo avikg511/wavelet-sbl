@@ -10,8 +10,12 @@ Parameters.jl (Pkg.add('Parameters'))
 MAT.jl (Pkg.add('MAT'))
 Plots.jl (Pkg.add('Plots'))
 Revise.jl (Pkg.add('Revise'))
-```
+LinearAlgebra.jl (Pkg.add('LinearAlgebra'))
+Peaks.jl (Pkg.add('Peaks'))
 
+
+Pkg.add("Match"); Pkg.add("Parameters"); Pkg.add("MAT"); Pkg.add("Plots"); Pkg.add("LinearAlgebra"); Pkg.add("Peaks")
+```
 ## Data
 The data itself is from the SWellEx-96 Experiment. More information on the experiment can be found [here](https://swellex96.ucsd.edu/). The general gist is that we're working with a few array geometries. The one we're using here is a Vertical Line Array (VLA). Nine different tones were transmitted underwater to this array over 20 minutes, and the data we have is for 64 hydrophones (63 officially because one of the hydrophones was broken).
 
