@@ -43,11 +43,17 @@ function run()
     # method = BFController.conventional_symlets
     # BFController.process(method, cfgs, filePath)
 
-    # 3. Sparse Bayesian Learning 
-    method = BFController.sbl 
-    report = BFController.process(method, cfgs, filePath)
-   
-    # # 4. Sparse Bayesian Learning with Symlets
-    # method = BFController.sbl_symlets
-    # BFController.process(method, cfgs, filePath)
+    # # 3. Sparse Bayesian Learning
+    method = BFController.sbl
+    report = BFController.process(method, cfgs, filePath);
+
+    # 4. Sparse Bayesian Learning with Symlets
+    method = BFController.sbl_symlets
+    rep = BFController.process(method, cfgs, filePath);
+
+    # 5. Sparse Bayesian Learning with Preliminary Wavelet denoising
+    method = BFController.sbl_denoising
+    reportt = BFController.process(method, cfgs, filePath);
+
+    return reportt
 end

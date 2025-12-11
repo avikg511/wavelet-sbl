@@ -2,22 +2,22 @@
     @author Avik Ghosh
     @date November 16th, 2025
 
-    Purpose: main.jl should not deal with a lot of configuration data. The user should just be 
+    Purpose: main.jl should not deal with a lot of configuration data. The user should just be
             able to simply configure the code from an upper level and have it work. This file
             will process the configuration, dispatching, etc. based on configs from main.jl
 
-        NOTE: Julia's module import system is a bit finnicky. If one module is imported in two 
+        NOTE: Julia's module import system is a bit finnicky. If one module is imported in two
             different locations, they are treated as different types. This means each module must
             be imported at one location. This means beamformer takes care of the actual imports and
             main.jl actually is a 'child' of beamformer.jl. This file is the upper level
-=# 
+=#
 
 # Includes
 module BFController
 
 # Imports
 include("./configs.jl")
-using .SwellConfigs 
+using .SwellConfigs
 
 using Match             # Module to make nicer looking Enum Match Statements
 using MAT               # For reading .mat files
@@ -38,15 +38,18 @@ function process(method::ProcessingMethod, all_cfgs::PhysicalConfigs{T, U, V}, f
     all_cfgs.Experiment = process_data(filePath, all_cfgs.Geometry, T, U, V)
 
     # Now, based on the method chosen, dispatch to the correct processing routine
-    @match method begin 
+    @match method begin
         $conventional => process_conv(all_cfgs)
         $conventional_symlets => process_conv_sym(all_cfgs)
         $sbl => process_sbl(all_cfgs)
         $sbl_symlets => process_sbl_sym(all_cfgs)
+        $sbl_denoising => process_sbl_denoising(all_cfgs)
 
         # If not one of the above types, throw an error
         _ => throw(ErrorException("Please choose a valid Processing type."))
     end
+
+    return all_cfgs
 end
 
 # Purpose: Reads an input data file and returns necessary data/measurements for
@@ -59,9 +62,13 @@ function readDataFile(filePath, brokenSensors, ::Type{T}, ::Type{U}, ::Type{V}) 
    dataMat = dataFile["snapshotsAmplitude"];
 
    # Delete sensor rows for broken sensors
-   for i in brokenSensors 
+   for i in brokenSensors
       dataMat = dataMat[1:end .!= i, :, :]
    end
+
+   # To use wavelets nicely, we need to constrain our signal to be 2^N snapshots long
+   dataMat = dataMat[:, 1:Int(2^floor(log2(size(dataMat)[2]))), :]
+   @show size(dataMat)
 
    # Get all the information about the data and return. Get all_tones first for num_tones
    all_tones = vec(dataFile["allTones"])
@@ -72,21 +79,21 @@ function readDataFile(filePath, brokenSensors, ::Type{T}, ::Type{U}, ::Type{V}) 
         num_sensors = convert(T, size(dataMat)[1]),
         num_snapshots = convert(T, size(dataMat)[2]),
 
-        start_time = convert(U, dataFile["startTime"]), 
+        start_time = convert(U, dataFile["startTime"]),
         stop_time = convert(U, dataFile["stopTime"]),
         data = convert(Array{V, 3}, dataMat),
         all_tones = convert(Vector{U}, all_tones)
    )
 end
 
-# This function does all the templating for the data extraction, though defaults to 
+# This function does all the templating for the data extraction, though defaults to
 #   UInt32, Float64, ComplexF64 for reasonable precision
 function process_data(mat_path::String, geometry::GeometryConfig, ::Type{T}=UInt32, ::Type{U}=Float64, ::Type{V}=ComplexF64) where {T <: Integer, U <:AbstractFloat, V <: Complex}
     # Read data from file, removing broken sensors
     exp_info = readDataFile(mat_path, geometry.broken_indices, T, U, V)
     return exp_info
 end
-    
+
 # Internal Calls
 function process_conv(all_cfgs::PhysicalConfigs{T, U, V}) where {T <: Integer, U <: AbstractFloat, V <: Complex}
     ConventionalBeamforming.conventional_bf(all_cfgs)
@@ -101,7 +108,11 @@ function process_sbl(all_cfgs::PhysicalConfigs)
 end
 
 function process_sbl_sym(all_cfgs::PhysicalConfigs)
-    println("In the Sparse Bayesian Learning with Symlets Processing Function!")
+    SparseBayesianLearning.sbl_with_symlets(all_cfgs)
+end
+
+function process_sbl_denoising(all_cfgs::PhysicalConfigs)
+    SparseBayesianLearning.sbl_denoising(all_cfgs)
 end
 
 end # module

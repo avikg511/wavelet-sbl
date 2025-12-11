@@ -6,12 +6,13 @@
                 using simple steering vectors
 
     More detail about each implementation can be found in the respective functions
-=# 
+=#
 
 module ConventionalBeamforming
 
 using ..SwellConfigs
 using Plots
+using Wavelets
 
 function conventional_bf(all_cfgs::PhysicalConfigs{T, U, V}) where {T <: Integer, U <: AbstractFloat, V <: Complex}
     println("In the Conventional Beamforming Module!")
@@ -24,12 +25,83 @@ function conventional_bf(all_cfgs::PhysicalConfigs{T, U, V}) where {T <: Integer
 
     # Sample plot
     tone_ind::T = 9
-    plt = heatmap(1:all_cfgs.Experiment.num_snapshots, all_cfgs.Geometry.angles, 10*log10.(abs.(beamforming_output[:, :, tone_ind]) .^ 2)) 
+    plt = heatmap(1:all_cfgs.Experiment.num_snapshots, all_cfgs.Geometry.angles, 10*log10.(abs.(beamforming_output[:, :, tone_ind]) .^ 2))
+
+    title!("Beamforming for Tone $tone_ind")
     xlabel!("Time [min]")
     ylabel!("DOA [deg]")
 
     ylims!((-40, 40))
 
+    savefig(plt, pwd() * "/presentation/conventional_bf_op_$tone_ind.png")
+    display(plt)
+
+    #=
+        Wavelet Domain Processing!
+        =============================================================
+        Now, what we have is beamforming output, so for M=9 tones, we have M matrices that are angles x snapshots for the expected DoA per tone.
+
+        We won't use the above system though. We now want to work with, each snapshot, using a matrix where each row is assigned to an angle, and then the row itself contains the intensities per tone. Now, you can treat this like a signal in and of itself, where the leakage across frequency bins makes it a poor visualization.
+
+        Applying wavelets, splitting it into high/low frequency portions and then smoothing the components with thresholding should make the overall plots cleaner when displayed.
+
+        Though note that the last axis will be our snapshots. This can be applied 2D but first, let's just compare the effect of wavelets on smoothing/isolating the DoA plots on a per snapshot-basis.
+    =#
+    wt = wavelet(WT.sym4)
+    thr = 0.3
+
+    # Currently we are at [angles x snapshots x tones]
+    # We want [snapshots x angles x tones]
+    reorg = permutedims(beamforming_output, [2, 1, 3])
+    M = 100         # Random Snapshot of interest
+    old_snap = reorg[M, :, :]
+    wavelet_snap = similar(old_snap)
+
+    for i in 1:length(all_cfgs.Geometry.angles)
+        # Extract the one dimensional signal across each angle, contains all tones
+        sig = old_snap[i, :]
+
+        # Take the Discrete Wavelet Transform and threshold, remove the noise-like coefficients. Can't use 0 because that shows really poor results for the dB power heatmap
+        c = dwt(sig, wt)
+        @show maximum(abs2, c)
+
+        c_thresh = map(x -> abs2(x) < thr ? 0.0im : x, c)
+
+        try
+            wavelet_snap[i, :] = idwt(c_thresh, wt)
+        catch
+            v = all_cfgs.Geometry.angles[i]
+            @show c_thresh, "Angle was $v",
+            return
+        end
+
+        # Now note that we can't use any 0 coefficients because the heatmap is just pure white, rather than dark. let's fix that using isapprox
+        wavelet_snap[i, :] = map(x -> isapprox(x, 0.0) ? 1e-9 : x, wavelet_snap[i, :])
+    end
+
+    # Now plotting properly for each scenario
+    # Plot 1 - No Wavelet
+    plt = heatmap(1:all_cfgs.Experiment.num_tones, all_cfgs.Geometry.angles, 10*log10.(abs2.(old_snap)))
+
+    title!("Unsmoothed Tone vs Power at DoA (Snapshot $M)")
+    xlabel!("ith Tone")
+    ylabel!("Degree of Arrival (DoA) [deg]")
+
+    ylims!((-40, 40))
+
+    savefig(plt, pwd() * "/presentation/conventional_bf_unsmoothed_tonevsangle.png")
+    display(plt)
+
+    # Plot 2 - Wavelets!
+    plt = heatmap(1:all_cfgs.Experiment.num_tones, all_cfgs.Geometry.angles, 10*log10.(abs2.(wavelet_snap)))
+
+    title!("Smoothed Tone vs Power at DoA (Snapshot $M)")
+    xlabel!("ith Tone")
+    ylabel!("Degree of Arrival (DoA) [deg]")
+
+    ylims!((-40, 40))
+
+    savefig(plt, pwd() * "/presentation/conventional_bf_smoothed_tonevsangle.png")
     display(plt)
 end
 
